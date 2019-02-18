@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gather-flowers-deployment
+  labels:
+    app: gather-flowers
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gather-flowers
+  template:
+    metadata:
+      labels:
+        app: gather-flowers
+    spec:
+      containers:
+      - name: gather-flowers
+        image: mindlapse/gather-flowers
+        volumeMounts:
+        - name: flower-storage 
+          mountPath: /data
+        imagePullPolicy: Always
+        env:
+        - name: START_TS
+          value: "1312482635000"
+        - name: API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: flickr-secret
+              key: api-key
+      volumes:
+      - name: flower-storage
+        persistentVolumeClaim:
+          claimName: pv-flowers-claim

@@ -1,0 +1,16 @@
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pv-flowers-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  # storageClass: slow
+  resources:
+    requests:
+      storage: 20Gi
+  selector:
+    matchExpressions:
+      - {key: purpose, operator: In, values: ["flowers"]}
