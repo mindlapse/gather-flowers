@@ -9,7 +9,7 @@ spec:
   accessModes:
   - ReadWriteOnce
   capacity:
-    storage: 20Gi
+    storage: 100Gi
   local:
     path: /home/titan/shared/tera/land/db/pv-flowers
   nodeAffinity:

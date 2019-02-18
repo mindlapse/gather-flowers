@@ -10,7 +10,7 @@ spec:
   # storageClass: slow
   resources:
     requests:
-      storage: 20Gi
+      storage: 100Gi
   selector:
     matchExpressions:
       - {key: purpose, operator: In, values: ["flowers"]}
