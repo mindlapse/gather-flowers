@@ -10,4 +10,6 @@ COPY . /opt/flower
 
 WORKDIR /opt/flower
 
-CMD node gather.js 
+ENV API_KEY=unk
+
+CMD node gather.js

@@ -5,7 +5,7 @@ const start_ts = parseInt(process.env.START_TS) || 0
 const download = require('download-file')
 
 const MIN_DIM = 1024
-const SLEEP_SECONDS = 2
+const SLEEP_SECONDS = 3
 const FOLDER = "/data/"
 const flickr = new Flickr(api_key);
 
@@ -27,16 +27,24 @@ async function getPostedDate(photo) {
 
     while (true) {
         try {
+            console.log(`Searching ${min_upload_date}`)
             let res = await flickr.photos.search({
                 text: 'flower,flowers',
-                per_page : 10,
+                per_page : 1000,
                 sort : 'date-posted-asc',
                 min_upload_date
             })
             let photos = res.body.photos
+            let numPhotos = photos.photo.length
+
+            console.log(`Found ${numPhotos} photos`)
+            if (numPhotos == 0) {
+                console.log(res.body)
+            }
+
 
             let advanced = false
-        
+
             for (let p = 0; p < photos.photo.length; p++) {
                 
                 let photo = photos.photo[p]
@@ -73,6 +81,7 @@ async function getPostedDate(photo) {
             }
         } catch (e) {
             console.log(e)
+            min_upload_date = new Date(min_upload_date.getTime() + 60*1000)
             // Pass
         }
         sleep(SLEEP_SECONDS)

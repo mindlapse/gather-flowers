@@ -2,3 +2,4 @@ node_modules
 images
 .auth
 kube/api-key
+.DS_Store
