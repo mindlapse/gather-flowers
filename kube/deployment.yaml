@@ -24,7 +24,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: START_TS
-          value: "1393730202000"
+          value: "0"
         - name: API_KEY
           valueFrom:
             secretKeyRef:

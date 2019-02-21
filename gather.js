@@ -4,7 +4,8 @@ const api_key  = process.env.API_KEY
 const start_ts = parseInt(process.env.START_TS) || 0
 const download = require('download-file')
 
-const MIN_DIM = 1024
+const MIN_DIM = 512
+const MAX_DIM = 1024
 const SLEEP_SECONDS = 3
 const FOLDER = "/data/"
 const flickr = new Flickr(api_key);
@@ -25,19 +26,32 @@ async function getPostedDate(photo) {
     min_upload_date = new Date(start_ts)
     console.log(`Starting at timestamp ${start_ts}: ${min_upload_date}`)
 
+    let page = -1
+    let pages = 99999
     while (true) {
         try {
             console.log(`Searching ${min_upload_date}`)
+            page += 1
+            if (page >= pages) {
+                break
+            }
+
+            // flower,flowers,lotus,water lily,daffodil,rose,gardenia,pansy
             let res = await flickr.photos.search({
-                text: 'flower,flowers',
-                per_page : 1000,
+                tags: 'rose,bokeh',
+                tag_mode: 'all',
+                per_page : 150,
                 sort : 'date-posted-asc',
+                page,
                 min_upload_date
             })
+            pages = res.body.photos.pages
             let photos = res.body.photos
             let numPhotos = photos.photo.length
 
-            console.log(`Found ${numPhotos} photos`)
+            console.log(res.body)
+            console.log(`Found ${numPhotos} photos on page ${page} of ${pages}`)
+
             if (numPhotos == 0) {
                 console.log(res.body)
             }
@@ -61,19 +75,23 @@ async function getPostedDate(photo) {
                 let sizes = (await flickr.photos.getSizes({photo_id : photo.id})).body.sizes
             
                 if (sizes.candownload) {
-                    let size = sizes.size[sizes.size.length - 1]
-                    
-                    if (size.width < MIN_DIM || size.height < MIN_DIM) {
-                        continue
+                    for (let s = sizes.size.length - 1; s >= 0; s--) {
+                        let size = sizes.size[s]
+                        
+                        if (size.width < MIN_DIM || size.height < MIN_DIM ||
+                            (size.width >= MAX_DIM && size.height >= MAX_DIM)) {
+                            continue
+                        }
+                
+                        let filename = size.source.substring(size.source.lastIndexOf("/")+1)
+                        let url = size.source
+                        sleep(SLEEP_SECONDS)
+                        download(url, { directory: FOLDER, filename:  filename }, function(err) {
+                            if (err) throw err
+                            console.log(`Downloaded ${filename}`)
+                        })
+                        break
                     }
-            
-                    let filename = size.source.substring(size.source.lastIndexOf("/")+1)
-                    let url = size.source
-                    sleep(SLEEP_SECONDS)
-                    download(url, { directory: FOLDER, filename:  filename }, function(err) {
-                        if (err) throw err
-                        console.log(`Downloaded ${filename}`)
-                    }) 
                 }
             }
             if (!advanced) {
